@@ -1,0 +1,22 @@
+---
+- hosts: self
+  become: yes
+  tasks:
+  - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+    openssh_keypair:
+     path: /home/ubuntu/.ssh/id_rsa
+     owner: ubuntu
+     group: ubuntu
+- hosts: nodes
+  become: yes
+  tasks:
+   - name: Add the user 'biata' with a specific uid and a primary group of 'admin'
+     user:
+      name: biata
+      uid: 1040
+      group: admin
+   - name: Set authorized key for user biata copying it from current user
+     authorized_key:
+      user: biata
+      state: present
+      key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
